@@ -1,0 +1,42 @@
+name: Build and Package DLL
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '5.0.x'  # 根据你的项目需求调整.NET版本
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build project
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Publish project
+      run: dotnet publish --configuration Release --no-build --output ./publish
+
+    - name: Archive DLLs
+      run: |
+        mkdir -p artifacts
+        cp -r ./publish/*.dll artifacts/
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: dll-artifacts
+        path: artifacts/
